@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import { Button, SafeAreaView, Text, TextInput, View, ActivityIndicator } from 'react-native';
 import t from 'tcomb-form-native';
 import commonStyles from '../common/CommonScreenStyle';
+import {login} from '../../services'
+import {setToken} from '../../redux'
+import { connect } from 'react-redux';
 
 const Form = t.form.Form;
 
@@ -30,7 +33,7 @@ const options = {
     },
 };
 
-export default class SignUpScreen extends Component {
+class SignUpScreen extends Component {
     state = {
         user: {
             email: '',
@@ -53,7 +56,7 @@ export default class SignUpScreen extends Component {
     handleSubmit = () => {
         const value = this._form.getValue();
         if (value) { // if validation fails, value will be null
-
+            let self = this;
             // Future support for username
             let withUsername = {...this.state.user};
             withUsername.username = value.email;
@@ -71,8 +74,13 @@ export default class SignUpScreen extends Component {
                 .then((responseJson) => {
                     this.setState({isLoading: false});
                     if (responseJson.success){
-                        // TODO login
-                        this.setState({ user: null });
+                        login(this.state.user.email, this.state.user.password)
+                            .then(function (token) {
+                                self.props.setToken(token);
+                            }).catch((error) => {
+                            this.setState({isLoading: false});
+                            this.setState({error: error});
+                        });
                     } else {
                         let message = "";
                         for (let error in responseJson.errors){
@@ -111,3 +119,5 @@ export default class SignUpScreen extends Component {
         );
     }
 }
+
+export default connect(state => state.account, { setToken })(SignUpScreen);

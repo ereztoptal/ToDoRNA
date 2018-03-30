@@ -23,7 +23,9 @@ class ToDoListEdit(RetrieveUpdateDestroyAPIView):
 class ToDoListList(ListAPIView):
     serializer_class = ToDoListSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    queryset = ToDoList.objects.all()
+    
+    def get_queryset(self):
+        return ToDoList.objects.filter(created_by=self.request.user)
     
     
 class ToDoListItemsList(ListAPIView):

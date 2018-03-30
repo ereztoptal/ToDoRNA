@@ -51,7 +51,6 @@ class LoginScreen extends Component {
             this.setState({isLoading: true});
             login(this.state.user.email, this.state.user.password)
                 .then(function (token) {
-                    // TODO: login
                     self.props.setToken(token);
                 }).catch((error) => {
                 this.setState({isLoading: false});

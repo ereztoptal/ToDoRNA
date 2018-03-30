@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from django.contrib.auth.models import User
+from jsonfield import JSONField
 
 
 class ToDoList(models.Model):
@@ -8,6 +9,10 @@ class ToDoList(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
+    
+    @property
+    def items(self):
+        return self.todolistitem_set.all()
 
 
 class ToDoListItem(models.Model):
@@ -15,4 +20,6 @@ class ToDoListItem(models.Model):
     todo_list = models.ForeignKey(ToDoList, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
-    # TODO: add attachments (image, contact)
+    contact = JSONField(null=True, blank=True)
+    photo = JSONField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)

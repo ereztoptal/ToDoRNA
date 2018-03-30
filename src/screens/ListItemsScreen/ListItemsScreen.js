@@ -1,15 +1,18 @@
 import React, { Component } from 'react';
-import { Button, SafeAreaView, Text, View, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Button, SafeAreaView, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import {getListItemsApiCall, removeListItem} from '../../redux'
 import { connect } from 'react-redux';
-import commonStyles from '../common/CommonScreenStyle'
 import Icon from '../../components/Icon';
 
 let list = null;
 
 class ListItemsScreen extends Component{
-    navigateToAddItem = (list) => () => {
-        this.props.navigation.navigate('AddNewListItem', {list})
+    state = {
+        searchFilter: ""
+    };
+
+    navigateToAddItem = (list, item) => () => {
+        this.props.navigation.navigate('AddNewListItem', {list, item})
     };
 
     async componentDidMount() {
@@ -20,36 +23,52 @@ class ListItemsScreen extends Component{
         this.props.removeListItem(this.getList(), item);
     };
 
-    getList = () => {
-        return this.props.todoLists[this.props.navigation.state.params.listIndex];
-    };
-
     getListIndex = () =>{
         return this.props.navigation.state.params.listIndex;
     };
 
+    getList = () => {
+        return this.props.todoLists[this.getListIndex()];
+    };
+
+    itemsSearchFilter = (item) => {
+        if (item.title.indexOf(this.state.searchFilter) != -1 ||
+            item.description.indexOf(this.state.searchFilter) != -1){
+            return item;
+        }
+    };
+
     render(){
         return(
-            <SafeAreaView style={{ flex: 1, width: '100%', backgroundColor: 'white' }}>
-                {this.props.todoLists[this.getListIndex()].items && this.props.todoLists[this.getListIndex()].items.map((item, index) => (
-                    <View style={{
-                        padding: 10,
-                        paddingHorizontal: 40,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                    }} key={index}>
-                        <TouchableOpacity onPress={() => this.removeItem(item)}>
-                            <Text style={{ fontSize: 20, color: '#1679bf' }}>{item.title}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => this.removeItem(item)}>
-                            <Icon nameIos='ios-remove-circle-outline' nameAndroid='remove' size={20} />
-                        </TouchableOpacity>
-                    </View>
-                ))}
+            <SafeAreaView style={{ flex: 1, width: '100%', backgroundColor: 'white' }} >
                 <View>
-                    <Button onPress={this.navigateToAddItem(this.getList())} title="Add"/>
+                    <TextInput placeholder="Search..."
+                               onChangeText={(text) => this.setState({searchFilter:text})}
+                               style={{ fontSize: 20, padding:10, paddingHorizontal: 40 }}/>
                 </View>
+                <View style={{ flex: 0.95}}>
+                    <ScrollView>
+                        {this.getList().items &&
+                        this.getList().items.filter(this.itemsSearchFilter).map((item, index) => (
+                            <View style={{
+                                padding: 10,
+                                paddingHorizontal: 40,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-between'
+                            }} key={index}>
+                                <TouchableOpacity onPress={this.navigateToAddItem(this.getList(),item)}>
+                                    <Text style={{ fontSize: 20, color: '#1679bf' }}>{item.title}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => this.removeItem(item)}>
+                                    <Icon nameIos='ios-remove-circle-outline' nameAndroid='remove' size={20} />
+                                </TouchableOpacity>
+
+                            </View>
+                        ))}
+                    </ScrollView>
+                </View>
+                <Button onPress={this.navigateToAddItem(this.getList(), null)} title="Add"/>
             </SafeAreaView>
         )
     }

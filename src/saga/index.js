@@ -1,6 +1,6 @@
 import { all, call, put, takeLatest } from 'redux-saga/effects';
 import * as Api from '../redux';
-import {getTodoLists, addTodoList, removeTodoList, getListItems, addListItem, removeListItem} from '../services'
+import {getTodoLists, addTodoList, removeTodoList, getListItems, addListItem, updateListItem, removeListItem} from '../services'
 
 export function* todoListsApiCall() {
     try {
@@ -63,6 +63,17 @@ export function* removeListItemApiCall(list) {
     }
 }
 
+export function* updateLisItemApiCall(list) {
+    try {
+        console.log(list.list, list.item);
+        const response = yield call(() => updateListItem(list.list, list.item));
+        const data = yield call(() => response);
+        yield put({ type: Api.ADD_LIST_ITEM_SUCCESS, data });
+    } catch (err) {
+        yield put({ type: Api.ADD_LIST_ITEM_FAILURE });
+    }
+}
+
 export default function* root() {
     yield all([
         takeLatest(Api.GET_TODO_LISTS_API_CALL, todoListsApiCall),
@@ -70,6 +81,7 @@ export default function* root() {
         takeLatest(Api.REMOVE_LIST, removeTodoListApiCall),
         takeLatest(Api.GET_LIST_ITEMS, listItemsApiCall),
         takeLatest(Api.ADD_LIST_ITEM, addLisItemApiCall),
+        takeLatest(Api.UPDATE_LIST_ITEM, updateLisItemApiCall),
         takeLatest(Api.REMOVE_LIST_ITEM, removeListItemApiCall)
     ])
 }

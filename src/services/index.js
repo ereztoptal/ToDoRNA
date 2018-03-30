@@ -105,7 +105,24 @@ export async function addListItem(list, item) {
             body: JSON.stringify(item),
         });
         let responseJson = await response.json();
-        console.log(responseJson);
+        return responseJson;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export async function updateListItem(list, item) {
+    try {
+        let response = await fetch(URL + TODO_LIST + "items/" + item.uuid + "/",{
+            method: 'PATCH',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: 'Token ' + token
+            },
+            body: JSON.stringify(item),
+        });
+        let responseJson = await response.json();
         return responseJson;
     } catch (error) {
         console.error(error);
